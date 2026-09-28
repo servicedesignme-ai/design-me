@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react'
 import TextArea from '@/app/reusable-ui/textarea/TextArea'
 import { sendMessage } from '@/app/actions/actions'
 import Image from 'next/image'
+import Link from 'next/link'
 
 export default function Contact() {
   const [name, setName] = useState('')
@@ -103,6 +104,11 @@ export default function Contact() {
               />
             )}
           </button>
+          <p className={styles.privacyNotice}>
+            Les informations recueillies sont traitées par DESIGN-ME pour répondre à votre demande
+            de devis. Vous disposez de droits sur vos données :{' '}
+            <Link href="/politique-de-confidentialite">en savoir plus</Link>.
+          </p>
         </form>
       </div>
     </section>
