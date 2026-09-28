@@ -1,0 +1,344 @@
+From 75b274f5dfd6041979da8bf76d90ab7ed6029121 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Mon, 28 Sep 2026 18:22:14 +0200
+Subject: [PATCH] =?UTF-8?q?feat:=20pages=20l=C3=A9gales=20=C3=A9ditables?=
+ =?UTF-8?q?=20dans=20Payload=20(collection=20Legal=20:=20titre,=20adresse,?=
+ =?UTF-8?q?=20contenu)?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Les pages /mentions-legales et /politique-de-confidentialite lisent leur contenu
+dans Payload, avec repli sur le texte du code si la page n'existe pas.
+Nécessite d'ajouter les colonnes title/slug à la table legal avant déploiement.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_017s6RqFjHwcW19H7hx549tJ
+---
+ src/app/(frontend)/mentions-legales/page.tsx  | 37 ++++++++++---
+ .../politique-de-confidentialite/page.tsx     | 41 +++++++++++---
+ src/app/components/legal-page/LegalTitle.tsx  | 11 ++++
+ src/app/components/legal-page/getLegalPage.ts | 32 +++++++++++
+ .../legal-page/legal-page.module.css          | 19 +++++++
+ src/collections/Legal.ts                      | 53 +++++++++++++++++++
+ src/payload-types.ts                          |  9 ++++
+ 7 files changed, 190 insertions(+), 12 deletions(-)
+ create mode 100644 src/app/components/legal-page/LegalTitle.tsx
+ create mode 100644 src/app/components/legal-page/getLegalPage.ts
+
+diff --git a/src/app/(frontend)/mentions-legales/page.tsx b/src/app/(frontend)/mentions-legales/page.tsx
+index b83056e..a438948 100644
+--- a/src/app/(frontend)/mentions-legales/page.tsx
++++ b/src/app/(frontend)/mentions-legales/page.tsx
+@@ -1,6 +1,11 @@
++import { RichText } from '@payloadcms/richtext-lexical/react'
++import { getLegalPage } from '@/app/components/legal-page/getLegalPage'
+ import Link from 'next/link'
++import LegalTitle from '@/app/components/legal-page/LegalTitle'
+ import styles from '@/app/components/legal-page/legal-page.module.css'
+ 
++export const dynamic = 'force-dynamic'
++
+ export const metadata = {
+   title: 'Mentions légales | Agence Design-me',
+   description: 'Mentions légales du site de l’agence web DESIGN-ME.',
+@@ -9,13 +14,9 @@ export const metadata = {
+   },
+ }
+ 
+-export default function MentionsLegalesPage() {
++function DefaultContent() {
+   return (
+-    <article className={styles.legalPage}>
+-      <h1>
+-        Mentions <span>légales</span>
+-      </h1>
+-
++    <>
+       <section>
+         <h2>Éditeur du site</h2>
+         <p>DESIGN-ME, SAS au capital de 1 000 €</p>
+@@ -76,6 +77,30 @@ export default function MentionsLegalesPage() {
+           Voir notre <Link href="/politique-de-confidentialite">politique de confidentialité</Link>.
+         </p>
+       </section>
++    </>
++  )
++}
++
++export default async function MentionsLegalesPage() {
++  const page = await getLegalPage('mentions-legales')
++
++  return (
++    <article className={styles.legalPage}>
++      {page ? (
++        <>
++          <LegalTitle title={page.title} />
++          <div className={styles.richText}>
++            <RichText data={page.content} />
++          </div>
++        </>
++      ) : (
++        <>
++          <h1>
++            Mentions <span>légales</span>
++          </h1>
++          <DefaultContent />
++        </>
++      )}
+     </article>
+   )
+ }
+diff --git a/src/app/(frontend)/politique-de-confidentialite/page.tsx b/src/app/(frontend)/politique-de-confidentialite/page.tsx
+index 03aba9d..55c33e7 100644
+--- a/src/app/(frontend)/politique-de-confidentialite/page.tsx
++++ b/src/app/(frontend)/politique-de-confidentialite/page.tsx
+@@ -1,6 +1,11 @@
++import { RichText } from '@payloadcms/richtext-lexical/react'
++import { getLegalPage } from '@/app/components/legal-page/getLegalPage'
++import LegalTitle from '@/app/components/legal-page/LegalTitle'
+ import styles from '@/app/components/legal-page/legal-page.module.css'
+ import AudienceOptOut from '@/app/components/legal-page/AudienceOptOut'
+ 
++export const dynamic = 'force-dynamic'
++
+ export const metadata = {
+   title: 'Politique de confidentialité | Agence Design-me',
+   description: 'Politique de confidentialité et gestion des cookies du site DESIGN-ME.',
+@@ -9,13 +14,9 @@ export const metadata = {
+   },
+ }
+ 
+-export default function PolitiqueConfidentialitePage() {
++function DefaultContent() {
+   return (
+-    <article className={styles.legalPage}>
+-      <h1>
+-        Politique de <span>confidentialité</span>
+-      </h1>
+-
++    <>
+       <section>
+         <h2>Responsable du traitement</h2>
+         <p>DESIGN-ME SAS, 14 rue Léo Lagrange, 35131 Chartres-de-Bretagne.</p>
+@@ -93,6 +94,34 @@ export default function PolitiqueConfidentialitePage() {
+         <p>Vous pouvez à tout moment vous opposer à cette mesure d’audience sur ce navigateur :</p>
+         <AudienceOptOut />
+       </section>
++    </>
++  )
++}
++
++export default async function PolitiqueConfidentialitePage() {
++  const page = await getLegalPage('politique-de-confidentialite')
++
++  return (
++    <article className={styles.legalPage}>
++      {page ? (
++        <>
++          <LegalTitle title={page.title} />
++          <div className={styles.richText}>
++            <RichText data={page.content} />
++          </div>
++          <section id="cookies">
++            <h2>Gérer la mesure d’audience</h2>
++            <AudienceOptOut />
++          </section>
++        </>
++      ) : (
++        <>
++          <h1>
++            Politique de <span>confidentialité</span>
++          </h1>
++          <DefaultContent />
++        </>
++      )}
+     </article>
+   )
+ }
+diff --git a/src/app/components/legal-page/LegalTitle.tsx b/src/app/components/legal-page/LegalTitle.tsx
+new file mode 100644
+index 0000000..84d4264
+--- /dev/null
++++ b/src/app/components/legal-page/LegalTitle.tsx
+@@ -0,0 +1,11 @@
++// Titre de page légale : le dernier mot est affiché en dégradé, comme sur le reste du site.
++export default function LegalTitle({ title }: { title: string }) {
++  const words = title.trim().split(/\s+/)
++  const last = words.pop()
++  return (
++    <h1>
++      {words.length > 0 && `${words.join(' ')} `}
++      <span>{last}</span>
++    </h1>
++  )
++}
+diff --git a/src/app/components/legal-page/getLegalPage.ts b/src/app/components/legal-page/getLegalPage.ts
+new file mode 100644
+index 0000000..62f7b53
+--- /dev/null
++++ b/src/app/components/legal-page/getLegalPage.ts
+@@ -0,0 +1,32 @@
++import { getPayload } from 'payload'
++import config from '@payload-config'
++import { unstable_cache } from 'next/cache'
++
++export type LegalSlug = 'mentions-legales' | 'politique-de-confidentialite'
++
++const fetchLegalPage = unstable_cache(
++  async (slug: LegalSlug) => {
++    const payload = await getPayload({ config })
++    const result = await payload.find({
++      collection: 'legal',
++      where: { slug: { equals: slug } },
++      limit: 1,
++    })
++    return result.docs[0] ?? null
++  },
++  ['legal'],
++  {
++    revalidate: 3600,
++    tags: ['legal'],
++  },
++)
++
++// Renvoie la page saisie dans Payload, ou null (le texte par défaut du code est alors affiché).
++export async function getLegalPage(slug: LegalSlug) {
++  try {
++    return await fetchLegalPage(slug)
++  } catch (error) {
++    console.error(`[legal] Impossible de charger "${slug}" depuis Payload`, error)
++    return null
++  }
++}
+diff --git a/src/app/components/legal-page/legal-page.module.css b/src/app/components/legal-page/legal-page.module.css
+index d239321..a64629a 100644
+--- a/src/app/components/legal-page/legal-page.module.css
++++ b/src/app/components/legal-page/legal-page.module.css
+@@ -63,3 +63,22 @@
+     }
+   }
+ }
++
++.richText {
++  ul,
++  ol {
++    padding-left: 24px;
++    margin-bottom: 8px;
++    color: #d2d2d2;
++    font-size: 18px;
++  }
++
++  h2,
++  h3 {
++    margin-top: 40px;
++  }
++}
++
++.richText + section {
++  margin-top: 40px;
++}
+diff --git a/src/collections/Legal.ts b/src/collections/Legal.ts
+index ec7f5ee..a5ca957 100644
+--- a/src/collections/Legal.ts
++++ b/src/collections/Legal.ts
+@@ -1,11 +1,64 @@
++import { revalidateTag } from 'next/cache'
+ import type { CollectionConfig } from 'payload'
+ 
++// Rafraîchit les pages légales du site après chaque modification dans l'admin.
++function revalidateLegal() {
++  try {
++    revalidateTag('legal', 'max')
++  } catch {
++    // Hors du serveur Next (script, migration) : rien à rafraîchir.
++  }
++}
++
+ export const Legal: CollectionConfig = {
+   slug: 'legal',
++  labels: {
++    singular: 'Page légale',
++    plural: 'Pages légales',
++  },
++
++  admin: {
++    useAsTitle: 'title',
++    defaultColumns: ['title', 'slug', 'updatedAt'],
++    description:
++      'Textes des pages légales du site. Le champ « Adresse de la page » doit rester « mentions-legales » ou « politique-de-confidentialite ».',
++  },
++
++  access: {
++    read: () => true,
++  },
++
++  hooks: {
++    afterChange: [revalidateLegal],
++    afterDelete: [revalidateLegal],
++  },
+ 
+   fields: [
++    {
++      name: 'title',
++      label: 'Titre',
++      type: 'text',
++      required: true,
++    },
++    {
++      name: 'slug',
++      label: 'Adresse de la page',
++      type: 'text',
++      required: true,
++      unique: true,
++      index: true,
++      admin: {
++        description:
++          'À ne pas modifier : « mentions-legales » ou « politique-de-confidentialite ».',
++      },
++      validate: (value: string | null | undefined) =>
++        value === 'mentions-legales' || value === 'politique-de-confidentialite'
++          ? true
++          : 'Valeurs possibles : mentions-legales ou politique-de-confidentialite',
++    },
+     {
+       name: 'content',
++      label: 'Contenu',
+       type: 'richText',
+       required: true,
+     },
+diff --git a/src/payload-types.ts b/src/payload-types.ts
+index bef12af..1ad18e1 100644
+--- a/src/payload-types.ts
++++ b/src/payload-types.ts
+@@ -249,11 +249,18 @@ export interface FaqJob {
+   createdAt: string;
+ }
+ /**
++ * Textes des pages légales du site. Le champ « Adresse de la page » doit rester « mentions-legales » ou « politique-de-confidentialite ».
++ *
+  * This interface was referenced by `Config`'s JSON-Schema
+  * via the `definition` "legal".
+  */
+ export interface Legal {
+   id: number;
++  title: string;
++  /**
++   * À ne pas modifier : « mentions-legales » ou « politique-de-confidentialite ».
++   */
++  slug: string;
+   content: {
+     root: {
+       type: string;
+@@ -486,6 +493,8 @@ export interface FaqJobSelect<T extends boolean = true> {
+  * via the `definition` "legal_select".
+  */
+ export interface LegalSelect<T extends boolean = true> {
++  title?: T;
++  slug?: T;
+   content?: T;
+   updatedAt?: T;
+   createdAt?: T;
+-- 
+2.43.0
+
