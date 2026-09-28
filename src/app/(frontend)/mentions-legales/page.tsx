@@ -23,7 +23,8 @@ export default function MentionsLegalesPage() {
         <p>RCS Rennes 981 591 183, SIRET 981 591 183 00042</p>
         <p>N° TVA intracommunautaire : FR31981591183</p>
         <p>
-          Téléphone : <a href="tel:+33629377972">06 29 37 79 72</a>
+          Téléphone : <a href="tel:+33629377972">06 29 37 79 72</a> ou{' '}
+          <a href="tel:+33767750253">07 67 75 02 53</a>
         </p>
         <p>
           E-mail : <a href="mailto:contact@agence-designme.com">contact@agence-designme.com</a>
