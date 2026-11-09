@@ -5,6 +5,7 @@ import Footer from '../components/footer/Footer'
 import { MobileMenuContextProvider } from '../context/MobileMenuContext'
 import MobileMenu from '../components/mobile-menu/MobileMenu'
 import Script from 'next/script'
+import CookieConsent from '../components/cookie-consent/CookieConsent'
 
 export const metadata = {
   description:
@@ -32,18 +33,7 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
             data-website-id="989307dc-437f-43f4-b256-41d09a39f45e"
             strategy="afterInteractive"
           />
-          <Script
-            src="https://www.googletagmanager.com/gtag/js?id=G-J7HPY78EJL"
-            strategy="afterInteractive"
-          />
-          <Script id="google-analytics" strategy="afterInteractive">
-            {`
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              gtag('js', new Date());
-              gtag('config', 'G-J7HPY78EJL');
-            `}
-          </Script>
+          <CookieConsent />
         </body>
       </MobileMenuContextProvider>
     </html>

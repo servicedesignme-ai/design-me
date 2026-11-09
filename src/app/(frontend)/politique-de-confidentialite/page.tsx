@@ -1,5 +1,6 @@
 import styles from '@/app/components/legal-page/legal-page.module.css'
 import AudienceOptOut from '@/app/components/legal-page/AudienceOptOut'
+import CookiePreferences from '@/app/components/legal-page/CookiePreferences'
 
 export const metadata = {
   title: 'Politique de confidentialité | Agence Design-me',
@@ -79,10 +80,17 @@ export default function PolitiqueConfidentialitePage() {
       <section id="cookies">
         <h2>Cookies et mesure d’audience</h2>
         <p>
-          Le site n’utilise aucun cookie publicitaire ni de suivi. Seuls des éléments strictement
-          nécessaires à son fonctionnement peuvent être utilisés ; ils ne nécessitent pas votre
-          consentement.
+          Le site n’utilise aucun cookie publicitaire. Seuls des éléments strictement nécessaires à
+          son fonctionnement peuvent être utilisés sans votre consentement.
         </p>
+        <p>
+          Avec votre accord, nous utilisons également Google Analytics pour mesurer l’audience du
+          site (pages vues, provenance, type d’appareil). Cet outil dépose des cookies (durée de
+          vie maximale : 13 mois) et transmet des données à Google. Ces cookies ne sont déposés
+          que si vous les acceptez via le bandeau affiché lors de votre première visite ; votre
+          choix est conservé 6 mois et vous pouvez le modifier à tout moment ci-dessous :
+        </p>
+        <CookiePreferences />
         <p>
           Pour mesurer l’audience du site et en améliorer le contenu, nous utilisons Umami, un outil
           de statistiques installé sur notre propre serveur. Umami ne dépose aucun cookie, ne
